@@ -21,6 +21,7 @@ pod 'CCIAPManager'
 ```
 
 ## Use
+```
 /*
  CCIAPVerifyType 验证类型
  CCIAPVerifyNever = 0, 不验证
@@ -112,6 +113,7 @@ completeHandle:(CCIAPCompletionHandle)completeHandle
 - (void)getUnVerifyRecepitWith:(NSString *)localId completion:(void(^)(NSDictionary *product))completion;
 
 @end
+```
 
 ## Author
 
