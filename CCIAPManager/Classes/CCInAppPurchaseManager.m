@@ -179,7 +179,7 @@ completeHandle:(CCIAPCompletionHandle)completeHandle{
     request.HTTPMethod = @"POST";
     request.HTTPBody = requestData;
     
-    [[NSURLSession sharedSession] dataTaskWithRequest:request completionHandler:^(NSData * _Nullable data, NSURLResponse * _Nullable response, NSError * _Nullable error) {
+    NSURLSessionDataTask *task = [[NSURLSession sharedSession] dataTaskWithRequest:request completionHandler:^(NSData * _Nullable data, NSURLResponse * _Nullable response, NSError * _Nullable error) {
         
         if (error){
             [self handleStatus:CCIAPVerifyNetError product:productID data:receipt];
@@ -202,6 +202,8 @@ completeHandle:(CCIAPCompletionHandle)completeHandle{
             [self handleStatus:CCIAPVerifyFailed product:productID data:nil];
         }
     }];
+    
+    [task resume];
 }
 
 - (void)serviceVerifyPurchaseWithPaymentProductID:(NSString *)productID receipt:(NSData *)receipt{
@@ -246,7 +248,6 @@ completeHandle:(CCIAPCompletionHandle)completeHandle{
 - (void)paymentQueue:(SKPaymentQueue *)queue updatedTransactions:(NSArray<SKPaymentTransaction *> *)transactions{
     for(SKPaymentTransaction *tran in transactions){
             
-        CCIAPStatus status;
         switch (tran.transactionState) {
             case SKPaymentTransactionStatePurchased:{
                 [self verifyPurchaseWithPaymentTransaction:tran];
@@ -255,16 +256,17 @@ completeHandle:(CCIAPCompletionHandle)completeHandle{
                 break;
             case SKPaymentTransactionStatePurchasing:
                 break;
-                
             case SKPaymentTransactionStateRestored:{
                 
-                status = CCIAPRestored;
-                
+                CCIAPStatus status = CCIAPRestored;
+                [self handleStatus:status product:tran.payment.productIdentifier data:nil];
+
                 [[SKPaymentQueue defaultQueue] finishTransaction:tran];
             }
                 break;
             case SKPaymentTransactionStateFailed:
             {
+                CCIAPStatus status;
                 if(tran.error.code != SKErrorPaymentCancelled){
                     status = CCIAPFailed;
                    
@@ -272,6 +274,8 @@ completeHandle:(CCIAPCompletionHandle)completeHandle{
                     status = CCIAPCancel;
                 
                 }
+                [self handleStatus:status product:tran.payment.productIdentifier data:nil];
+
                 [[SKPaymentQueue defaultQueue] finishTransaction:tran];
                 
             }
