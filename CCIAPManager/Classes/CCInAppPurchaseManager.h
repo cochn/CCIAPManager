@@ -99,6 +99,11 @@ completeHandle:(CCIAPCompletionHandle)completeHandle
  */
 - (void)getUnVerifyRecepitWith:(NSString *)localId completion:(void(^)(NSDictionary *product))completion;
 
+/*
+ 删除本地保存的凭证
+ */
+- (void)deleteUnVerifyRecepitWith:(NSString *)localId completion:(void(^)(void))completion;
+
 @end
 
 NS_ASSUME_NONNULL_END

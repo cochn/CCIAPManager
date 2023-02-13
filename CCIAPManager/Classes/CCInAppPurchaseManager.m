@@ -80,6 +80,13 @@
     !completion?:completion(products);
 }
 
+- (void)deleteUnVerifyRecepitWith:(NSString *)localId completion:(void(^)(void))completion{
+    NSUserDefaults *userDefault = [NSUserDefaults standardUserDefaults];
+    [userDefault removeObjectForKey:localId];
+    [userDefault synchronize];
+    !completion?:completion();
+}
+
 #pragma mark - private -
 - (void)setUp{
     [[SKPaymentQueue defaultQueue] addTransactionObserver:self];
