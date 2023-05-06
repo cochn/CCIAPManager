@@ -23,6 +23,8 @@
 
 @property (nonatomic, strong) NSMutableDictionary *completionHandleDic;
 
+@property (nonatomic, strong) SKProductsRequest *producesRequest;
+
 @end
 
 @implementation CCInAppPurchaseManager
@@ -97,11 +99,13 @@
     self.idsBlock = block;
     
     NSSet *set = [[NSSet alloc] initWithArray:ids];
-    SKProductsRequest *request = [[SKProductsRequest alloc] initWithProductIdentifiers:set];
+    if (_producesRequest == nil){
+        self.producesRequest = [[SKProductsRequest alloc] initWithProductIdentifiers:set];
+    }
     
-    request.delegate = self;
+    self.producesRequest.delegate = self;
     
-    [request start];
+    [self.producesRequest start];
 }
 
 - (void)startPurchaseWithID:(NSString *)productID verifyType:(CCIAPVerifyType)verifyType
@@ -238,6 +242,14 @@ completeHandle:(CCIAPCompletionHandle)completeHandle{
 }
 
 #pragma mark delegate
+- (void)requestDidFinish:(SKRequest *)request{
+    NSLog(@"[test] requestDidFinish:%@",request);
+}
+
+- (void)request:(SKRequest *)request didFailWithError:(NSError *)error{
+    NSLog(@"[test] error:%@",error);
+}
+
 - (void)productsRequest:(SKProductsRequest *)request didReceiveResponse:(SKProductsResponse *)response{
    
     [self.productDict removeAllObjects];
@@ -249,6 +261,9 @@ completeHandle:(CCIAPCompletionHandle)completeHandle{
     }
     
     !self.idsBlock?:self.idsBlock(productArray);
+    
+    
+    NSLog(@"[test] didReceiveResponse:%@",response);
 }
 
 
