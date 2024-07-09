@@ -1,5 +1,5 @@
 //
-//  CCInAppPurchaseManager.h
+//  HKAppstoreBuyManager.h
 //  zww
 //
 //  Created by mac on 2023/2/9.
@@ -46,40 +46,41 @@ typedef void(^CCIAPAppStoreSupportProductIDsBlock)(NSArray <NSString *> * ids);
 typedef void(^CCIAPCompletionHandle)(NSString *productID ,CCIAPStatus status, NSData *data);
 ///服务端认证handle
 typedef void(^CCIAPServiceVerifyHandle)(NSString *productID, NSString *receipt, CCIAPCompletionHandle handle);
+typedef void(^HKBuyFailureCallBack)(NSError *error);
 
-@interface CCInAppPurchaseManager : NSObject
+@interface HKAppstoreBuyManager : NSObject
 
 + (instancetype)shareInstance;
 
 ///请求appstore支持的产品
-- (void)requestProductsWithProductArray:(NSArray <NSString *> * _Nullable)ids completion:(nullable CCIAPAppStoreSupportProductIDsBlock)block;
+- (void)hk_buyProductsDatasInfo:(NSArray <NSString *> * _Nullable)ids completion:(nullable CCIAPAppStoreSupportProductIDsBlock)block;
 
 /*
  内购购买
  manager内部处理机制特性，同一productID同时只能请求一次，如需多次请求，请等待CCIAPCompletionHandle回调之后。
  productID与
- - (void)localVerifyPurchase: withPaymentProductID: receipt: completeHandle:的productID也不能一样
+ - (void)hk_appVerifyBuyInfo: withItemId: receipt: completeHandle:的productID也不能一样
  
  productID:产品ID
  verifyType:认证类型
  serviceVerifyHandle:服务端认证,如果verifyType==CCIAPVerifyService 此参数有效
  completeHandle:购买结果
  */
-- (void)startPurchaseWithID:(NSString *)productID verifyType:(CCIAPVerifyType)verifyType
-    serviceVerifyHandle:(nullable CCIAPServiceVerifyHandle)serviceVerifyHandle
-completeHandle:(CCIAPCompletionHandle)completeHandle;
+- (void)hk_buyWithProductId:(NSString *)productID verifyType:(CCIAPVerifyType)verifyType ID:(NSInteger)ID
+    verifyCallback:(nullable CCIAPServiceVerifyHandle)serviceVerifyHandle
+completeHandle:(CCIAPCompletionHandle)completeHandle failure:(HKBuyFailureCallBack)failure ;
 
 /*
  本地验证便捷方法
- 需保证productID唯一，同- (void)startPurchaseWithID:(NSString *)productID verifyType:(CCIAPVerifyType)verifyType
+ 需保证productID唯一，同- (void)hk_buyWithProductId:(NSString *)productID verifyType:(CCIAPVerifyType)verifyType
  serviceVerifyHandle:(nullable CCIAPServiceVerifyHandle)serviceVerifyHandle
 completeHandle:(CCIAPCompletionHandle)completeHandle
  */
-- (void)localVerifyPurchase:(NSString *)checkURL withPaymentProductID:(NSString *)productID receipt:(NSData *)receipt completeHandle:( CCIAPCompletionHandle)completeHandle;
+- (void)hk_appVerifyBuyInfo:(NSString *)checkURL withItemId:(NSString *)productID receipt:(NSData *)receipt completeHandle:( CCIAPCompletionHandle)completeHandle;
 
 @end
 
-@interface CCInAppPurchaseManager ()
+@interface HKAppstoreBuyManager ()
 
 
 /*
@@ -88,7 +89,7 @@ completeHandle:(CCIAPCompletionHandle)completeHandle
  
  localId:保存在本地的键值，建议每个用户使用不同id
  */
-- (BOOL)saveUnVerifyRecepitWith:(NSString *)localId productId:(NSString *)productId verifyType:(CCIAPVerifyType)verifyType receipt:(NSData *)receipt;
+- (BOOL)hk_saveReceiptWithLocalId:(NSString *)localId productId:(NSString *)productId verifyType:(CCIAPVerifyType)verifyType userInfo:(NSDictionary *)info receipt:(NSData *)receipt;
 /*
  获取本地保存的凭证
  回调内容 @{productId:@{
@@ -97,12 +98,12 @@ completeHandle:(CCIAPCompletionHandle)completeHandle
                         }
             }
  */
-- (void)getUnVerifyRecepitWith:(NSString *)localId completion:(void(^)(NSDictionary *product))completion;
+- (void)hk_getReceiptWithLocalId:(NSString *)localId completion:(void(^)(NSDictionary *product))completion;
 
 /*
  删除本地保存的凭证
  */
-- (void)deleteUnVerifyRecepitWith:(NSString *)localId completion:(void(^)(void))completion;
+- (void)hk_deleteReceiptWithLocalId:(NSString *)localId completion:(void(^)(void))completion;
 
 @end
 

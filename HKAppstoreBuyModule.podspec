@@ -7,7 +7,7 @@
 #
 
 Pod::Spec.new do |s|
-  s.name             = 'CCIAPManager'
+  s.name             = 'HKAppstoreBuyModule'
   s.version          = '1.0.0'
   s.summary          = 'A short description of CCIAPManager.'
 
