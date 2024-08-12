@@ -263,7 +263,7 @@ completeHandle:(CCIAPCompletionHandle)completeHandle{
     !self.idsBlock?:self.idsBlock(productArray);
     
     
-    NSLog(@"[test] didReceiveResponse:%@",productArray.count);
+//    NSLog(@"[test] didReceiveResponse:%@",productArray.count);
 }
 
 - (BOOL)paymentQueue:(SKPaymentQueue *)queue shouldAddStorePayment:(SKPayment *)payment forProduct:(SKProduct *)product{
