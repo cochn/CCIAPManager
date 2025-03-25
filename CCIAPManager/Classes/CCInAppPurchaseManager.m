@@ -20,10 +20,13 @@
 @property (nonatomic, copy) CCIAPAppStoreSupportProductIDsBlock idsBlock;
 
 @property (nonatomic, copy) CCIAPServiceVerifyHandle serviceVerifyHandle;
+@property (nonatomic, copy) CCIAPServiceVerifyHandle pendingServiceVerifyHandle;
 
 @property (nonatomic, strong) NSMutableDictionary *completionHandleDic;
 
 @property (nonatomic, strong) SKProductsRequest *producesRequest;
+
+@property (nonatomic, copy) NSString *userId;
 
 @end
 
@@ -76,6 +79,37 @@
     return YES;
 }
 
+- (void)configServiceVerifyHandle:(nullable CCIAPServiceVerifyHandle)serviceVerifyHandle {
+    self.serviceVerifyHandle = serviceVerifyHandle;
+}
+
+- (void)checkPendingTransactions {
+    NSArray *transactions = [SKPaymentQueue defaultQueue].transactions;
+    for (SKPaymentTransaction *transaction in transactions) {
+        if (transaction.transactionState == SKPaymentTransactionStatePurchased) {
+            NSString *transactionUserID = transaction.payment.applicationUsername;
+            if (transactionUserID == self.userId) {
+                [self verifyPurchaseWithPaymentTransaction:transaction];
+            }
+        }
+    }
+}
+
+- (void)retryPendingTransactions{
+    NSArray *ids = [self getPendingTransaction];
+    if (ids.count > 0) {
+        NSArray *transactions = [SKPaymentQueue defaultQueue].transactions;
+        for (SKPaymentTransaction *transaction in transactions) {
+            if ([ids containsObject:transaction.transactionIdentifier]) {
+                NSString *transactionUserID = transaction.payment.applicationUsername;
+                if (transactionUserID == self.userId) {
+                    [self verifyPurchaseWithPaymentTransaction:transaction];
+                }
+            }
+        }
+    }
+}
+
 - (void)getUnVerifyRecepitWith:(NSString *)localId completion:(void(^)(NSDictionary *product))completion{
     NSUserDefaults *userDefault = [NSUserDefaults standardUserDefaults];
     NSDictionary *products = [userDefault objectForKey:localId];
@@ -89,6 +123,9 @@
     !completion?:completion();
 }
 
+- (void)configUserId:(NSString *)userId {
+    self.userId = userId;
+}
 #pragma mark - private -
 - (void)setUp{
     [[SKPaymentQueue defaultQueue] addTransactionObserver:self];
@@ -109,13 +146,11 @@
 }
 
 - (void)startPurchaseWithID:(NSString *)productID verifyType:(CCIAPVerifyType)verifyType
-    serviceVerifyHandle:(nullable CCIAPServiceVerifyHandle)serviceVerifyHandle
 completeHandle:(CCIAPCompletionHandle)completeHandle{
     
     if (!productID || !completeHandle) return;
     
     self.verifyType = verifyType;
-    self.serviceVerifyHandle = serviceVerifyHandle;
     
     self.completionHandleDic[productID] = completeHandle;
     
@@ -130,7 +165,8 @@ completeHandle:(CCIAPCompletionHandle)completeHandle{
     }
     
     SKProduct *product = self.productDict[productID];
-    SKPayment *payment = [SKPayment paymentWithProduct:product];
+    SKMutablePayment *payment = [SKMutablePayment paymentWithProduct:product];
+    payment.applicationUsername = self.userId;
     [[SKPaymentQueue defaultQueue] addPayment:payment];
     
 }
@@ -227,9 +263,41 @@ completeHandle:(CCIAPCompletionHandle)completeHandle{
     self.serviceVerifyHandle(productID, receiptString, ^(NSString * _Nonnull productID, CCIAPStatus status, NSData * _Nonnull data) {
         if (status == CCIAPVerifySuccess) {
             [[SKPaymentQueue defaultQueue] finishTransaction:transaction];
+            [self removePendingTransaction:transaction.transactionIdentifier];
+        } else if (status == CCIAPVerifyNetError) {
+            [self storePendingTransaction: transaction.transactionIdentifier];
+        } else if (status == CCIAPVerifyFailed) {
+            [self removePendingTransaction:transaction.transactionIdentifier];
+            [[SKPaymentQueue defaultQueue] finishTransaction:transaction];
         }
         [weakSelf handleStatus:status product:productID data:data];
     });
+}
+
+- (void)storePendingTransaction:(NSString *)iden {
+    NSMutableArray *ids = [self getPendingTransaction].mutableCopy;
+    if (![ids containsObject:iden]) {
+        [ids addObject:iden];
+        [NSUserDefaults.standardUserDefaults synchronize];
+    }
+}
+
+- (NSArray*)getPendingTransaction {
+    NSString *key = [self localSaveKey];
+    NSArray *ids = [NSUserDefaults.standardUserDefaults objectForKey:key];
+    return ids;
+}
+
+- (void)removePendingTransaction:(NSString *)iden{
+    NSMutableArray *ids = [self getPendingTransaction].mutableCopy;
+    if ([ids containsObject:iden]) {
+        [ids removeObject:iden];
+        [NSUserDefaults.standardUserDefaults synchronize];
+    }
+}
+
+- (NSString *)localSaveKey{
+    return  [NSString stringWithFormat:@"iap_%@",self.userId];
 }
 
 - (void)handleStatus:(CCIAPStatus)status product:(NSString *)product data:(NSData *)data{

@@ -52,6 +52,15 @@ typedef void(^CCIAPServiceVerifyHandle)(NSString *productID, NSString *receipt, 
 
 + (instancetype)shareInstance;
 
+//用户唯一id 必须设置
+- (void)configUserId:(NSString *)userId;
+//serviceVerifyHandle:服务端认证 如果是服务端认证，在appdelegate里面设置
+- (void)configServiceVerifyHandle:(nullable CCIAPServiceVerifyHandle)serviceVerifyHandle;
+
+//app启动在登录状态下重试
+- (void)checkPendingTransactions;
+- (void)retryPendingTransactions;
+
 ///请求appstore支持的产品
 - (void)requestProductsWithProductArray:(NSArray <NSString *> * _Nullable)ids completion:(nullable CCIAPAppStoreSupportProductIDsBlock)block;
 
@@ -63,11 +72,9 @@ typedef void(^CCIAPServiceVerifyHandle)(NSString *productID, NSString *receipt, 
  
  productID:产品ID
  verifyType:认证类型
- serviceVerifyHandle:服务端认证,如果verifyType==CCIAPVerifyService 此参数有效
  completeHandle:购买结果
  */
 - (void)startPurchaseWithID:(NSString *)productID verifyType:(CCIAPVerifyType)verifyType
-    serviceVerifyHandle:(nullable CCIAPServiceVerifyHandle)serviceVerifyHandle
 completeHandle:(CCIAPCompletionHandle)completeHandle;
 
 

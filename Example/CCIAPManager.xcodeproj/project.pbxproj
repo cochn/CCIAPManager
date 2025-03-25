@@ -63,10 +63,10 @@
 		71719F9E1E33DC2100824A3D /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		873B8AEA1B1F5CCA007FD442 /* Main.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; name = Main.storyboard; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 		AC9CB2CF137810742B02F8F8 /* Pods_CCIAPManager_Tests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_CCIAPManager_Tests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		DAF080940970FF3252F0804C /* LICENSE */ = {isa = PBXFileReference; includeInIndex = 1; name = LICENSE; path = ../LICENSE; sourceTree = "<group>"; };
+		DAF080940970FF3252F0804C /* LICENSE */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text; name = LICENSE; path = ../LICENSE; sourceTree = "<group>"; };
 		DE4744B0B8B22775B7F18BAA /* Pods-CCIAPManager_Tests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-CCIAPManager_Tests.debug.xcconfig"; path = "Target Support Files/Pods-CCIAPManager_Tests/Pods-CCIAPManager_Tests.debug.xcconfig"; sourceTree = "<group>"; };
-		F0E244F07E166E35D42285D6 /* README.md */ = {isa = PBXFileReference; includeInIndex = 1; name = README.md; path = ../README.md; sourceTree = "<group>"; };
-		F4B1FC59FD8F837147E37DEF /* CCIAPManager.podspec */ = {isa = PBXFileReference; includeInIndex = 1; name = CCIAPManager.podspec; path = ../CCIAPManager.podspec; sourceTree = "<group>"; };
+		F0E244F07E166E35D42285D6 /* README.md */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = net.daringfireball.markdown; name = README.md; path = ../README.md; sourceTree = "<group>"; };
+		F4B1FC59FD8F837147E37DEF /* CCIAPManager.podspec */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text; name = CCIAPManager.podspec; path = ../CCIAPManager.podspec; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.ruby; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -193,7 +193,6 @@
 				DE4744B0B8B22775B7F18BAA /* Pods-CCIAPManager_Tests.debug.xcconfig */,
 				351D904F0ED737766474BD68 /* Pods-CCIAPManager_Tests.release.xcconfig */,
 			);
-			name = Pods;
 			path = Pods;
 			sourceTree = "<group>";
 		};
@@ -259,6 +258,7 @@
 			developmentRegion = English;
 			hasScannedForEncodings = 0;
 			knownRegions = (
+				English,
 				en,
 				Base,
 			);
