@@ -6,7 +6,7 @@
 //
 
 #import "CCInAppPurchaseManager.h"
-#import <StoreKit/StoreKit.h>
+
 
 #define kSandBoxURL @"https://sandbox.itunes.apple.com/verifyReceipt"
 #define kItunsURL @"https://buy.itunes.apple.com/verifyReceipt"
@@ -157,23 +157,23 @@ completeHandle:(CCIAPCompletionHandle)completeHandle{
     NSString *checkURL = kItunsURL;
 #endif
         
-        [self localVerifyPurchase:checkURL withPaymentProductID:productID receipt:receipt];
+        [self localVerifyPurchase:checkURL withPaymentProductID:productID receipt:receipt transaction:transaction];
     }else if (self.verifyType == CCIAPVerifyService){
-        [self serviceVerifyPurchaseWithPaymentProductID:productID receipt:receipt];
+        [self serviceVerifyPurchaseWithPaymentProductID:productID receipt:receipt transaction: transaction];
     }
     
 }
 
-- (void)localVerifyPurchase:(NSString *)checkURL withPaymentProductID:(NSString *)productID receipt:(NSData *)receipt completeHandle:( CCIAPCompletionHandle)completeHandle{
+- (void)localVerifyPurchase:(NSString *)checkURL withPaymentProductID:(NSString *)productID receipt:(NSData *)receipt transaction:(SKPaymentTransaction *)transaction completeHandle:( CCIAPCompletionHandle)completeHandle{
     
     if (!productID || !receipt || !completeHandle) return;
     
     self.completionHandleDic[productID] = completeHandle;
     
-    [self localVerifyPurchase:checkURL withPaymentProductID:productID receipt:receipt];
+    [self localVerifyPurchase:checkURL withPaymentProductID:productID receipt:receipt transaction: transaction];
 }
 
-- (void)localVerifyPurchase:(NSString *)checkURL withPaymentProductID:(NSString *)productID receipt:(NSData *)receipt{
+- (void)localVerifyPurchase:(NSString *)checkURL withPaymentProductID:(NSString *)productID receipt:(NSData *)receipt transaction:(SKPaymentTransaction *)transaction{
     
     NSURL *url = [NSURL URLWithString:checkURL];
     
@@ -206,8 +206,9 @@ completeHandle:(CCIAPCompletionHandle)completeHandle{
          
         NSString *status = [NSString stringWithFormat:@"%@",jsonResponse[@"status"]];
         if ([status isEqualToString:@"21007"]){
-            [self localVerifyPurchase:kItunsURL withPaymentProductID:productID receipt:receipt];
+            [self localVerifyPurchase:kItunsURL withPaymentProductID:productID receipt:receipt transaction:transaction];
         }else if ([status isEqualToString:@"0"]){
+            [[SKPaymentQueue defaultQueue] finishTransaction:transaction];
             [self handleStatus:CCIAPVerifySuccess product:productID data:nil];
         }else{
             [self handleStatus:CCIAPVerifyFailed product:productID data:nil];
@@ -217,13 +218,16 @@ completeHandle:(CCIAPCompletionHandle)completeHandle{
     [task resume];
 }
 
-- (void)serviceVerifyPurchaseWithPaymentProductID:(NSString *)productID receipt:(NSData *)receipt{
+- (void)serviceVerifyPurchaseWithPaymentProductID:(NSString *)productID receipt:(NSData *)receipt  transaction:(SKPaymentTransaction *)transaction{
     
     if (self.serviceVerifyHandle == nil) return;
     
     NSString *receiptString = [receipt base64EncodedStringWithOptions:0];
     __weak typeof(self) weakSelf = self;
     self.serviceVerifyHandle(productID, receiptString, ^(NSString * _Nonnull productID, CCIAPStatus status, NSData * _Nonnull data) {
+        if (status == CCIAPVerifySuccess) {
+            [[SKPaymentQueue defaultQueue] finishTransaction:transaction];
+        }
         [weakSelf handleStatus:status product:productID data:data];
     });
 }
@@ -276,7 +280,6 @@ completeHandle:(CCIAPCompletionHandle)completeHandle{
         switch (tran.transactionState) {
             case SKPaymentTransactionStatePurchased:{
                 [self verifyPurchaseWithPaymentTransaction:tran];
-                [[SKPaymentQueue defaultQueue] finishTransaction:tran];
             }
                 break;
             case SKPaymentTransactionStatePurchasing:

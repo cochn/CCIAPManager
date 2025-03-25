@@ -6,6 +6,7 @@
 //
 
 #import <Foundation/Foundation.h>
+#import <StoreKit/StoreKit.h>
 
 NS_ASSUME_NONNULL_BEGIN
 
@@ -69,14 +70,15 @@ typedef void(^CCIAPServiceVerifyHandle)(NSString *productID, NSString *receipt, 
     serviceVerifyHandle:(nullable CCIAPServiceVerifyHandle)serviceVerifyHandle
 completeHandle:(CCIAPCompletionHandle)completeHandle;
 
+
 /*
  本地验证便捷方法
  需保证productID唯一，同- (void)startPurchaseWithID:(NSString *)productID verifyType:(CCIAPVerifyType)verifyType
  serviceVerifyHandle:(nullable CCIAPServiceVerifyHandle)serviceVerifyHandle
 completeHandle:(CCIAPCompletionHandle)completeHandle
  */
-- (void)localVerifyPurchase:(NSString *)checkURL withPaymentProductID:(NSString *)productID receipt:(NSData *)receipt completeHandle:( CCIAPCompletionHandle)completeHandle;
 
+- (void)localVerifyPurchase:(NSString *)checkURL withPaymentProductID:(NSString *)productID receipt:(NSData *)receipt transaction:(SKPaymentTransaction *)transaction completeHandle:(CCIAPCompletionHandle)completeHandle;
 @end
 
 @interface CCInAppPurchaseManager ()
