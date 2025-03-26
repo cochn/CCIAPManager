@@ -61,6 +61,9 @@ typedef void(^CCIAPServiceVerifyHandle)(NSString *productID, NSString *receipt, 
 - (void)checkPendingTransactions;
 - (void)retryPendingTransactions;
 
+//获取未完成的订单
+- (NSArray*)getPendingTransaction;
+
 ///请求appstore支持的产品
 - (void)requestProductsWithProductArray:(NSArray <NSString *> * _Nullable)ids completion:(nullable CCIAPAppStoreSupportProductIDsBlock)block;
 
